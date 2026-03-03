@@ -184,19 +184,19 @@ export default function App() {
     }
   }, [])
 
-  // Wake up Render free-tier backend on mount before firing predictions
+  // Poll /health until server actually responds 200 (handles Render cold starts)
   useEffect(() => {
     let cancelled = false
-    const warmup = async () => {
-      try {
-        await fetch(`${API_URL}/health`)
-      } catch (_) {
-        // ignore — prediction call will surface any real error
-      } finally {
-        if (!cancelled) setWarming(false)
+    const poll = async () => {
+      while (!cancelled) {
+        try {
+          const res = await fetch(`${API_URL}/health`)
+          if (res.ok) { if (!cancelled) setWarming(false); return }
+        } catch (_) { /* server still sleeping, keep polling */ }
+        await new Promise(r => setTimeout(r, 3000))
       }
     }
-    warmup()
+    poll()
     return () => { cancelled = true }
   }, [])
 
