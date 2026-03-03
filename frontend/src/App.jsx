@@ -153,6 +153,7 @@ export default function App() {
   const [result, setResult]   = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(null)
+  const [warming, setWarming] = useState(true)
 
   // Debounce all param changes before firing API
   const debouncedParams = useDebounce(params, 300)
@@ -183,9 +184,26 @@ export default function App() {
     }
   }, [])
 
+  // Wake up Render free-tier backend on mount before firing predictions
   useEffect(() => {
+    let cancelled = false
+    const warmup = async () => {
+      try {
+        await fetch(`${API_URL}/health`)
+      } catch (_) {
+        // ignore — prediction call will surface any real error
+      } finally {
+        if (!cancelled) setWarming(false)
+      }
+    }
+    warmup()
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    if (warming) return
     fetchPrediction(debouncedParams, debouncedShift)
-  }, [debouncedParams, debouncedShift, fetchPrediction])
+  }, [warming, debouncedParams, debouncedShift, fetchPrediction])
 
   const setParam = (key) => (val) => setParams(prev => ({ ...prev, [key]: val }))
 
@@ -239,12 +257,12 @@ export default function App() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{
             width: '8px', height: '8px', borderRadius: '50%',
-            background: error ? '#ff4466' : '#00ff88',
-            boxShadow: `0 0 8px ${error ? '#ff4466' : '#00ff88'}`,
+            background: warming ? '#ffaa00' : error ? '#ff4466' : '#00ff88',
+            boxShadow: `0 0 8px ${warming ? '#ffaa00' : error ? '#ff4466' : '#00ff88'}`,
             animation: 'pulse 2s ease-in-out infinite',
           }} />
           <span className="mono" style={{ fontSize: '12px', color: '#6b6b8a' }}>
-            {error ? 'DISCONNECTED' : 'LIVE'}
+            {warming ? 'WARMING UP' : error ? 'DISCONNECTED' : 'LIVE'}
           </span>
         </div>
       </header>
