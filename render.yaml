@@ -1,12 +1,8 @@
 services:
   - type: web
     name: steel-plant-api
-    env: python
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     region: oregon
     plan: free
-    buildCommand: pip install -r backend/requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
-    rootDir: .
-    envVars:
-      - key: PYTHON_VERSION
-        value: "3.11.0"
