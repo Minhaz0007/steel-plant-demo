@@ -39,7 +39,6 @@ def _load(name: str):
 model_temperature = _load("model_temperature.pkl")   # XGBoost
 model_production  = _load("model_production.pkl")    # LightGBM
 model_energy      = _load("model_energy.pkl")        # LightGBM
-model_machines    = _load("model_machines.pkl")      # loaded but not used
 energy_encoders   = _load("energy_encoders.pkl")     # dict of LabelEncoders
 manpower_ratio    = _load("manpower_ratio.pkl")      # dict {"workers_per_tonne": float}
 
