@@ -1,11 +1,13 @@
 /* ── Reset & base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Dark theme (default) ── */
 :root {
   --bg-deep:    #0a0a0f;
   --bg-card:    #12121a;
   --bg-card2:   #1a1a26;
-  --bg-border:  #252535;
+  --bg-border:  #2e2e45;
+  --bg-input:   #1e1e2e;
   --blue:       #00d4ff;
   --blue-dim:   rgba(0,212,255,0.12);
   --blue-glow:  rgba(0,212,255,0.35);
@@ -16,8 +18,45 @@
   --red:        #ff4466;
   --red-dim:    rgba(255,68,102,0.12);
   --text-main:  #e8e8f0;
-  --text-muted: #6b6b8a;
-  --text-dim:   #44445a;
+  --text-muted: #8a8ab0;
+  --text-dim:   #606080;
+  --text-label: #aaaacc;
+
+  --gradient-card:   linear-gradient(135deg, #12121a 0%, #1a1a26 100%);
+  --gradient-header: linear-gradient(90deg,  #12121a 0%, #1a1a26 100%);
+  --gradient-panel:  linear-gradient(180deg, #12121a 0%, #0e0e18 100%);
+  --shadow-card:     0 2px 20px rgba(0,0,0,0.5);
+  --grid-line:  rgba(0,212,255,0.03);
+}
+
+/* ── Light theme ── */
+[data-theme="light"] {
+  --bg-deep:    #eef1fb;
+  --bg-card:    #ffffff;
+  --bg-card2:   #f4f6ff;
+  --bg-border:  #d4d8ee;
+  --bg-input:   #e4e8f5;
+
+  --blue:       #0077bb;
+  --blue-dim:   rgba(0,119,187,0.10);
+  --blue-glow:  rgba(0,119,187,0.30);
+  --amber:      #b86800;
+  --amber-dim:  rgba(184,104,0,0.10);
+  --green:      #007744;
+  --green-dim:  rgba(0,119,68,0.10);
+  --red:        #cc2244;
+  --red-dim:    rgba(204,34,68,0.10);
+
+  --text-main:  #1a1a30;
+  --text-muted: #5a5a80;
+  --text-dim:   #8080a8;
+  --text-label: #4a4a88;
+
+  --gradient-card:   linear-gradient(135deg, #ffffff 0%, #f4f6ff 100%);
+  --gradient-header: linear-gradient(90deg,  #ffffff 0%, #f4f6ff 100%);
+  --gradient-panel:  linear-gradient(180deg, #ffffff 0%, #f0f3ff 100%);
+  --shadow-card:     0 2px 20px rgba(0,0,50,0.08);
+  --grid-line:  rgba(0,80,180,0.05);
 }
 
 html, body, #root {
@@ -27,6 +66,7 @@ html, body, #root {
   color: var(--text-main);
   font-family: 'Rajdhani', sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.25s ease, color 0.15s ease;
 }
 
 /* ── Animated grid background ── */
@@ -35,8 +75,8 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 48px 48px;
   animation: gridPan 30s linear infinite;
   pointer-events: none;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
@@ -48,18 +48,18 @@ function Slider({ label, value, min, max, step = 1, unit = '', onChange, accent 
   return (
     <div style={{ marginBottom: '14px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-        <span style={{ fontSize: '13px', color: '#9999bb', fontWeight: 500, letterSpacing: '0.5px' }}>
+        <span style={{ fontSize: '13px', color: 'var(--text-label)', fontWeight: 500, letterSpacing: '0.5px' }}>
           {label}
         </span>
         <span className="mono" style={{ fontSize: '13px', color: accent, fontWeight: 700 }}>
           {typeof value === 'number' && step < 1 ? value.toFixed(step === 0.1 ? 1 : 2) : value}
-          {unit && <span style={{ color: '#6b6b8a', marginLeft: '2px', fontSize: '11px' }}>{unit}</span>}
+          {unit && <span style={{ color: 'var(--text-muted)', marginLeft: '2px', fontSize: '11px' }}>{unit}</span>}
         </span>
       </div>
       <div style={{ position: 'relative', height: '6px' }}>
         <div style={{
           position: 'absolute', inset: 0,
-          background: '#1e1e2e', borderRadius: '3px',
+          background: 'var(--bg-input)', borderRadius: '3px',
         }} />
         <div style={{
           position: 'absolute', left: 0, top: 0, bottom: 0,
@@ -78,8 +78,8 @@ function Slider({ label, value, min, max, step = 1, unit = '', onChange, accent 
         />
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3px' }}>
-        <span style={{ fontSize: '10px', color: '#44445a' }}>{min}</span>
-        <span style={{ fontSize: '10px', color: '#44445a' }}>{max}</span>
+        <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>{min}</span>
+        <span style={{ fontSize: '10px', color: 'var(--text-dim)' }}>{max}</span>
       </div>
     </div>
   )
@@ -89,7 +89,7 @@ function Slider({ label, value, min, max, step = 1, unit = '', onChange, accent 
 function MetricCard({ title, value, unit, subtitle, icon, color, loading, children }) {
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #12121a 0%, #1a1a26 100%)',
+      background: 'var(--gradient-card)',
       border: `1px solid ${color}33`,
       borderRadius: '16px',
       padding: '24px',
@@ -112,7 +112,7 @@ function MetricCard({ title, value, unit, subtitle, icon, color, loading, childr
         <span style={{ fontSize: '22px' }}>{icon}</span>
         <span style={{
           fontSize: '12px', fontWeight: 600, letterSpacing: '1.5px',
-          textTransform: 'uppercase', color: '#6b6b8a',
+          textTransform: 'uppercase', color: 'var(--text-muted)',
         }}>{title}</span>
       </div>
 
@@ -131,13 +131,13 @@ function MetricCard({ title, value, unit, subtitle, icon, color, loading, childr
           }}>
             {value !== null && value !== undefined ? value : '—'}
             {unit && (
-              <span style={{ fontSize: '16px', color: '#6b6b8a', marginLeft: '6px', fontWeight: 400 }}>
+              <span style={{ fontSize: '16px', color: 'var(--text-muted)', marginLeft: '6px', fontWeight: 400 }}>
                 {unit}
               </span>
             )}
           </div>
           {subtitle && (
-            <div style={{ fontSize: '13px', color: '#6b6b8a' }}>{subtitle}</div>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{subtitle}</div>
           )}
           {children}
         </>
@@ -154,6 +154,33 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(null)
   const [warming, setWarming] = useState(true)
+  const [isDark, setIsDark]   = useState(true)
+
+  // Sync theme attribute with document root
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme')
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light')
+    }
+  }, [isDark])
+
+  // Theme-aware accent colors
+  const COLORS = isDark ? {
+    blue:   '#00d4ff',
+    green:  '#00ff88',
+    amber:  '#ffaa00',
+    red:    '#ff4466',
+    purple: '#b388ff',
+    orange: '#ff7043',
+  } : {
+    blue:   '#0077bb',
+    green:  '#007744',
+    amber:  '#b86800',
+    red:    '#cc2244',
+    purple: '#6633bb',
+    orange: '#cc4400',
+  }
 
   // Debounce all param changes before firing API
   const debouncedParams = useDebounce(params, 300)
@@ -208,13 +235,13 @@ export default function App() {
   const setParam = (key) => (val) => setParams(prev => ({ ...prev, [key]: val }))
 
   // Temperature color logic
-  const tempColor = !result ? '#00d4ff'
-    : result.temperature < 1530 ? '#00d4ff'
-    : result.temperature <= 1560 ? '#00ff88'
-    : '#ff4466'
+  const tempColor = !result ? COLORS.blue
+    : result.temperature < 1530 ? COLORS.blue
+    : result.temperature <= 1560 ? COLORS.green
+    : COLORS.red
 
-  const effScore   = result?.efficiency_score ?? 0
-  const effColor   = effScore >= 85 ? '#00ff88' : effScore >= 60 ? '#ffaa00' : '#ff4466'
+  const effScore = result?.efficiency_score ?? 0
+  const effColor = effScore >= 85 ? COLORS.green : effScore >= 60 ? COLORS.amber : COLORS.red
 
   return (
     <div style={{
@@ -228,16 +255,16 @@ export default function App() {
       <header style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '18px 28px',
-        background: 'linear-gradient(90deg, #12121a 0%, #1a1a26 100%)',
-        border: '1px solid #252535',
+        background: 'var(--gradient-header)',
+        border: '1px solid var(--bg-border)',
         borderRadius: '14px',
-        boxShadow: '0 2px 20px rgba(0,0,0,0.5)',
+        boxShadow: 'var(--shadow-card)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{
             width: '42px', height: '42px',
-            background: 'linear-gradient(135deg, #00d4ff22, #00d4ff44)',
-            border: '1px solid #00d4ff55',
+            background: 'var(--blue-dim)',
+            border: '1px solid var(--blue-glow)',
             borderRadius: '10px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '22px',
@@ -245,25 +272,49 @@ export default function App() {
           <div>
             <h1 style={{
               fontFamily: 'Rajdhani', fontWeight: 700, fontSize: '22px',
-              letterSpacing: '2px', color: '#e8e8f0',
+              letterSpacing: '2px', color: 'var(--text-main)',
             }}>
-              STEEL PLANT <span style={{ color: '#00d4ff' }}>OPTIMIZATION</span>
+              STEEL PLANT <span style={{ color: 'var(--blue)' }}>OPTIMIZATION</span>
             </h1>
-            <div style={{ fontSize: '12px', color: '#6b6b8a', letterSpacing: '1px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--text-muted)', letterSpacing: '1px' }}>
               ML-POWERED PRODUCTION INTELLIGENCE
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '8px', height: '8px', borderRadius: '50%',
-            background: warming ? '#ffaa00' : error ? '#ff4466' : '#00ff88',
-            boxShadow: `0 0 8px ${warming ? '#ffaa00' : error ? '#ff4466' : '#00ff88'}`,
-            animation: 'pulse 2s ease-in-out infinite',
-          }} />
-          <span className="mono" style={{ fontSize: '12px', color: '#6b6b8a' }}>
-            {warming ? 'WARMING UP' : error ? 'DISCONNECTED' : 'LIVE'}
-          </span>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Theme toggle */}
+          <button
+            onClick={() => setIsDark(d => !d)}
+            style={{
+              padding: '7px 14px',
+              background: 'var(--bg-card2)',
+              border: '1px solid var(--bg-border)',
+              borderRadius: '8px',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              fontFamily: 'Rajdhani',
+              fontWeight: 600,
+              fontSize: '13px',
+              letterSpacing: '0.5px',
+              display: 'flex', alignItems: 'center', gap: '6px',
+            }}
+          >
+            {isDark ? '☀ LIGHT' : '🌙 DARK'}
+          </button>
+
+          {/* Status indicator */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              width: '8px', height: '8px', borderRadius: '50%',
+              background: warming ? COLORS.amber : error ? COLORS.red : COLORS.green,
+              boxShadow: `0 0 8px ${warming ? COLORS.amber : error ? COLORS.red : COLORS.green}`,
+              animation: 'pulse 2s ease-in-out infinite',
+            }} />
+            <span className="mono" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+              {warming ? 'WARMING UP' : error ? 'DISCONNECTED' : 'LIVE'}
+            </span>
+          </div>
         </div>
       </header>
 
@@ -277,8 +328,8 @@ export default function App() {
 
         {/* ─── LEFT PANEL: Controls ─── */}
         <div style={{
-          background: 'linear-gradient(180deg, #12121a 0%, #0e0e18 100%)',
-          border: '1px solid #252535',
+          background: 'var(--gradient-panel)',
+          border: '1px solid var(--bg-border)',
           borderRadius: '14px',
           padding: '24px',
           overflowY: 'auto',
@@ -286,8 +337,8 @@ export default function App() {
         }}>
           <div style={{
             fontSize: '11px', fontWeight: 700, letterSpacing: '2px',
-            color: '#00d4ff', marginBottom: '20px',
-            textTransform: 'uppercase', borderBottom: '1px solid #252535',
+            color: 'var(--blue)', marginBottom: '20px',
+            textTransform: 'uppercase', borderBottom: '1px solid var(--bg-border)',
             paddingBottom: '12px',
           }}>
             ⚙ Production Parameters
@@ -299,21 +350,21 @@ export default function App() {
             min={150} max={185} step={0.5}
             unit="t"
             onChange={setParam('workpiece_weight')}
-            accent="#00d4ff"
+            accent={COLORS.blue}
           />
           <Slider
             label="Active Streams"
             value={params.num_stream}
             min={1} max={6} step={1}
             onChange={setParam('num_stream')}
-            accent="#00d4ff"
+            accent={COLORS.blue}
           />
           <Slider
             label="Crystallizers"
             value={params.num_crystallizer}
             min={1} max={24} step={1}
             onChange={setParam('num_crystallizer')}
-            accent="#00d4ff"
+            accent={COLORS.blue}
           />
           <Slider
             label="Cast Sequence"
@@ -321,7 +372,7 @@ export default function App() {
             min={1} max={20} step={1}
             unit="rows"
             onChange={setParam('cast_in_row')}
-            accent="#00d4ff"
+            accent={COLORS.blue}
           />
           <Slider
             label="Casting Speed"
@@ -329,7 +380,7 @@ export default function App() {
             min={0.5} max={2.0} step={0.1}
             unit="m/min"
             onChange={setParam('alloy_speed')}
-            accent="#ffaa00"
+            accent={COLORS.amber}
           />
           <Slider
             label="Water Flow"
@@ -337,15 +388,15 @@ export default function App() {
             min={100} max={500} step={5}
             unit="L/min"
             onChange={setParam('water_consumption')}
-            accent="#00d4ff"
+            accent={COLORS.blue}
           />
 
           {/* Shift selector */}
           <div style={{ margin: '20px 0 14px' }}>
             <div style={{
               fontSize: '11px', fontWeight: 700, letterSpacing: '2px',
-              color: '#00d4ff', marginBottom: '14px',
-              textTransform: 'uppercase', borderBottom: '1px solid #252535',
+              color: 'var(--blue)', marginBottom: '14px',
+              textTransform: 'uppercase', borderBottom: '1px solid var(--bg-border)',
               paddingBottom: '12px',
             }}>
               ◷ Shift Schedule
@@ -357,12 +408,10 @@ export default function App() {
                   onClick={() => setShift(s)}
                   style={{
                     padding: '10px 14px',
-                    background: shift === s
-                      ? 'linear-gradient(90deg, #00d4ff22, #00d4ff11)'
-                      : 'transparent',
-                    border: `1px solid ${shift === s ? '#00d4ff55' : '#252535'}`,
+                    background: shift === s ? 'var(--blue-dim)' : 'transparent',
+                    border: shift === s ? '1px solid var(--blue-glow)' : '1px solid var(--bg-border)',
                     borderRadius: '8px',
-                    color: shift === s ? '#00d4ff' : '#6b6b8a',
+                    color: shift === s ? 'var(--blue)' : 'var(--text-muted)',
                     cursor: 'pointer',
                     fontFamily: 'Rajdhani',
                     fontWeight: 600,
@@ -373,7 +422,7 @@ export default function App() {
                   }}
                 >
                   {s === 'Day Shift' ? '☀ ' : s === 'Night Shift' ? '🌙 ' : '🏖 '}{s}
-                  <span style={{ fontSize: '11px', marginLeft: '8px', color: '#44445a' }}>
+                  <span style={{ fontSize: '11px', marginLeft: '8px', color: 'var(--text-dim)' }}>
                     {SHIFTS[s].load_type.replace('_', ' ')}
                   </span>
                 </button>
@@ -385,8 +434,8 @@ export default function App() {
           {error && (
             <div style={{
               marginTop: '16px', padding: '12px 14px',
-              background: '#ff446618', border: '1px solid #ff446644',
-              borderRadius: '8px', fontSize: '12px', color: '#ff8899',
+              background: 'var(--red-dim)', border: '1px solid var(--red)',
+              borderRadius: '8px', fontSize: '12px', color: 'var(--red)',
               fontFamily: 'JetBrains Mono',
             }}>
               ✗ {error}
@@ -421,7 +470,7 @@ export default function App() {
             <MetricCard
               title="Production Output"
               icon="⚙"
-              color="#00ff88"
+              color={COLORS.green}
               loading={loading}
               value={result?.production?.toFixed(1)}
               unit="t"
@@ -432,7 +481,7 @@ export default function App() {
             <MetricCard
               title="Energy Consumption"
               icon="⚡"
-              color="#ffaa00"
+              color={COLORS.amber}
               loading={loading}
               value={result ? (result.energy_kwh / 1000).toFixed(2) : null}
               unit="MWh"
@@ -443,7 +492,7 @@ export default function App() {
             <MetricCard
               title="Workforce Required"
               icon="👷"
-              color="#b388ff"
+              color={COLORS.purple}
               loading={loading}
               value={result?.manpower}
               unit=""
@@ -453,8 +502,8 @@ export default function App() {
 
           {/* ── Efficiency Score bar ── */}
           <div style={{
-            background: 'linear-gradient(135deg, #12121a 0%, #1a1a26 100%)',
-            border: '1px solid #252535',
+            background: 'var(--gradient-card)',
+            border: '1px solid var(--bg-border)',
             borderRadius: '16px',
             padding: '24px',
           }}>
@@ -465,17 +514,17 @@ export default function App() {
               <div>
                 <div style={{
                   fontSize: '11px', fontWeight: 700, letterSpacing: '2px',
-                  textTransform: 'uppercase', color: '#6b6b8a',
+                  textTransform: 'uppercase', color: 'var(--text-muted)',
                 }}>
                   ▲ Production Efficiency Score
                 </div>
-                <div style={{ fontSize: '12px', color: '#44445a', marginTop: '4px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
                   Based on production output vs. 170t target
                 </div>
               </div>
               <div className="mono" style={{
                 fontSize: '36px', fontWeight: 700,
-                color: loading ? '#44445a' : effColor,
+                color: loading ? 'var(--text-dim)' : effColor,
                 textShadow: loading ? 'none' : `0 0 20px ${effColor}66`,
               }}>
                 {loading ? '—' : `${effScore.toFixed(1)}%`}
@@ -485,7 +534,7 @@ export default function App() {
             {/* Progress bar */}
             <div style={{
               height: '12px',
-              background: '#1e1e2e',
+              background: 'var(--bg-input)',
               borderRadius: '6px',
               overflow: 'hidden',
               position: 'relative',
@@ -510,7 +559,7 @@ export default function App() {
               marginTop: '6px',
             }}>
               {[0, 25, 50, 75, 100].map(v => (
-                <span key={v} className="mono" style={{ fontSize: '10px', color: '#44445a' }}>{v}%</span>
+                <span key={v} className="mono" style={{ fontSize: '10px', color: 'var(--text-dim)' }}>{v}%</span>
               ))}
             </div>
           </div>
@@ -530,17 +579,17 @@ export default function App() {
               { label: 'Shift',            value: shift,                          unit: ''      },
             ].map(stat => (
               <div key={stat.label} style={{
-                background: '#12121a',
-                border: '1px solid #252535',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--bg-border)',
                 borderRadius: '10px',
                 padding: '14px 16px',
               }}>
-                <div style={{ fontSize: '11px', color: '#44445a', letterSpacing: '0.5px', marginBottom: '6px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-dim)', letterSpacing: '0.5px', marginBottom: '6px' }}>
                   {stat.label}
                 </div>
-                <div className="mono" style={{ fontSize: '16px', color: '#9999bb', fontWeight: 600 }}>
+                <div className="mono" style={{ fontSize: '16px', color: 'var(--text-label)', fontWeight: 600 }}>
                   {stat.value}
-                  {stat.unit && <span style={{ fontSize: '11px', color: '#44445a', marginLeft: '4px' }}>{stat.unit}</span>}
+                  {stat.unit && <span style={{ fontSize: '11px', color: 'var(--text-dim)', marginLeft: '4px' }}>{stat.unit}</span>}
                 </div>
               </div>
             ))}
@@ -551,13 +600,13 @@ export default function App() {
             display: 'flex', gap: '12px', flexWrap: 'wrap',
           }}>
             {[
-              { label: 'Temperature Model', badge: 'XGBoost',  color: '#ff7043' },
-              { label: 'Production Model',  badge: 'LightGBM', color: '#00ff88' },
-              { label: 'Energy Model',      badge: 'LightGBM', color: '#ffaa00' },
+              { label: 'Temperature Model', badge: 'XGBoost',  color: COLORS.orange },
+              { label: 'Production Model',  badge: 'LightGBM', color: COLORS.green  },
+              { label: 'Energy Model',      badge: 'LightGBM', color: COLORS.amber  },
             ].map(m => (
               <div key={m.label} style={{
-                background: '#12121a',
-                border: '1px solid #252535',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--bg-border)',
                 borderRadius: '8px',
                 padding: '10px 16px',
                 display: 'flex', alignItems: 'center', gap: '10px',
@@ -572,7 +621,7 @@ export default function App() {
                   color: m.color, letterSpacing: '0.5px',
                   fontFamily: 'JetBrains Mono',
                 }}>{m.badge}</div>
-                <span style={{ fontSize: '12px', color: '#6b6b8a' }}>{m.label}</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{m.label}</span>
               </div>
             ))}
           </div>
