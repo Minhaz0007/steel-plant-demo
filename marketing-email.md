@@ -1,12 +1,12 @@
 # Marketing Email — Steel Plant ML Optimization Dashboard
 
-**Subject:** Maximize Steel Output & Cut Costs with AI-Powered Prediction — See It in Action
+**Subject:** Run Your Steel Plant Smarter — Know What's Coming Before It Happens
 
 ---
 
 Hi [Name],
 
-Imagine knowing your steel plant's temperature, production output, and energy consumption *before* the shift even begins — our **Steel Plant ML Optimization Dashboard** does exactly that, delivering real-time predictions across four critical metrics (molten steel temperature, daily production tonnage, energy usage in kWh, and required workforce) using battle-tested XGBoost and LightGBM models trained on 27 operational parameters spanning casting speeds, chemical composition (C, Mn, Si, P, Cu), power quality factors, and load profiles. The predictions refresh within 300ms as your operators adjust parameters, giving your team an instant feedback loop to simulate shift scenarios — Day, Night, or Weekend — and fine-tune inputs to hit your 170-tonne production target while keeping energy costs and CO₂ emissions in check. Built on a FastAPI backend with a sleek React dashboard featuring live efficiency scoring, temperature color-coding, and manpower estimation, it's ready to deploy on your infrastructure today — let's schedule a demo and show you the ROI firsthand.
+Running a steel plant means making dozens of costly decisions every single day — how many workers to schedule, how much energy you'll burn, whether your output will hit the target — and right now, most of those decisions are educated guesses. Our **Steel Plant Smart Dashboard** changes that by giving your team an easy-to-use app that instantly tells you how much steel you'll produce, how much it will cost in energy, how many workers you'll need, and whether your furnace is running at the right heat — all before the shift starts, so you can adjust and avoid waste. You simply dial in your current settings (things like casting speed, load type, and material mix), and the app shows you a live prediction on a clean, visual screen that anyone on your floor can read and act on. It's like having an experienced engineer watching every number at once — without the guesswork, the overtime surprises, or the costly trial-and-error — and it's ready to use from day one.
 
 Best regards,
 The Steel Plant AI Team
