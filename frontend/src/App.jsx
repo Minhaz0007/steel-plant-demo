@@ -154,14 +154,14 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState(null)
   const [warming, setWarming] = useState(true)
-  const [isDark, setIsDark]   = useState(true)
+  const [isDark, setIsDark]   = useState(false)
 
   // Sync theme attribute with document root
   useEffect(() => {
     if (isDark) {
-      document.documentElement.removeAttribute('data-theme')
+      document.documentElement.setAttribute('data-theme', 'dark')
     } else {
-      document.documentElement.setAttribute('data-theme', 'light')
+      document.documentElement.removeAttribute('data-theme')
     }
   }, [isDark])
 
