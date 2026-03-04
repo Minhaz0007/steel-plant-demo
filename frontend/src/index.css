@@ -1,36 +1,8 @@
 /* ── Reset & base ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Dark theme (default) ── */
+/* ── Light theme (default) ── */
 :root {
-  --bg-deep:    #0a0a0f;
-  --bg-card:    #12121a;
-  --bg-card2:   #1a1a26;
-  --bg-border:  #2e2e45;
-  --bg-input:   #1e1e2e;
-  --blue:       #00d4ff;
-  --blue-dim:   rgba(0,212,255,0.12);
-  --blue-glow:  rgba(0,212,255,0.35);
-  --amber:      #ffaa00;
-  --amber-dim:  rgba(255,170,0,0.12);
-  --green:      #00ff88;
-  --green-dim:  rgba(0,255,136,0.12);
-  --red:        #ff4466;
-  --red-dim:    rgba(255,68,102,0.12);
-  --text-main:  #e8e8f0;
-  --text-muted: #8a8ab0;
-  --text-dim:   #606080;
-  --text-label: #aaaacc;
-
-  --gradient-card:   linear-gradient(135deg, #12121a 0%, #1a1a26 100%);
-  --gradient-header: linear-gradient(90deg,  #12121a 0%, #1a1a26 100%);
-  --gradient-panel:  linear-gradient(180deg, #12121a 0%, #0e0e18 100%);
-  --shadow-card:     0 2px 20px rgba(0,0,0,0.5);
-  --grid-line:  rgba(0,212,255,0.03);
-}
-
-/* ── Light theme ── */
-[data-theme="light"] {
   --bg-deep:    #eef1fb;
   --bg-card:    #ffffff;
   --bg-card2:   #f4f6ff;
@@ -57,6 +29,34 @@
   --gradient-panel:  linear-gradient(180deg, #ffffff 0%, #f0f3ff 100%);
   --shadow-card:     0 2px 20px rgba(0,0,50,0.08);
   --grid-line:  rgba(0,80,180,0.05);
+}
+
+/* ── Dark theme ── */
+[data-theme="dark"] {
+  --bg-deep:    #0a0a0f;
+  --bg-card:    #12121a;
+  --bg-card2:   #1a1a26;
+  --bg-border:  #2e2e45;
+  --bg-input:   #1e1e2e;
+  --blue:       #00d4ff;
+  --blue-dim:   rgba(0,212,255,0.12);
+  --blue-glow:  rgba(0,212,255,0.35);
+  --amber:      #ffaa00;
+  --amber-dim:  rgba(255,170,0,0.12);
+  --green:      #00ff88;
+  --green-dim:  rgba(0,255,136,0.12);
+  --red:        #ff4466;
+  --red-dim:    rgba(255,68,102,0.12);
+  --text-main:  #e8e8f0;
+  --text-muted: #8a8ab0;
+  --text-dim:   #606080;
+  --text-label: #aaaacc;
+
+  --gradient-card:   linear-gradient(135deg, #12121a 0%, #1a1a26 100%);
+  --gradient-header: linear-gradient(90deg,  #12121a 0%, #1a1a26 100%);
+  --gradient-panel:  linear-gradient(180deg, #12121a 0%, #0e0e18 100%);
+  --shadow-card:     0 2px 20px rgba(0,0,0,0.5);
+  --grid-line:  rgba(0,212,255,0.03);
 }
 
 html, body, #root {
