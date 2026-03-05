@@ -1,5 +1,6 @@
 import logging
 import pickle
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -21,19 +22,24 @@ def load_pkl(filename):
         logging.warning(f"Could not load {filename}: {e}")
         return None
 
+MODELS = {
+    "model_temperature": "model_temperature.pkl",
+    "model_production":  "model_production.pkl",
+    "model_yield":       "model_yield.pkl",
+    "model_energy":      "model_energy.pkl",
+    "model_rul":         "model_rul.pkl",
+    "feature_names":     "feature_names.pkl",
+    "energy_meta":       "energy_meta.pkl",
+}
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.model_temperature = load_pkl("model_temperature.pkl")
-    app.state.model_production  = load_pkl("model_production.pkl")
-    app.state.model_yield       = load_pkl("model_yield.pkl")
-    app.state.model_energy      = load_pkl("model_energy.pkl")
-    app.state.model_rul         = load_pkl("model_rul.pkl")
-    app.state.feature_names     = load_pkl("feature_names.pkl")
-    app.state.energy_meta       = load_pkl("energy_meta.pkl")
+    with ThreadPoolExecutor() as pool:
+        futures = {key: pool.submit(load_pkl, fname) for key, fname in MODELS.items()}
+        for key, future in futures.items():
+            setattr(app.state, key, future.result())
 
-    loaded = [k for k in ["model_temperature","model_production","model_yield",
-                           "model_energy","model_rul","feature_names","energy_meta"]
-              if getattr(app.state, k, None) is not None]
+    loaded = [k for k in MODELS if getattr(app.state, k, None) is not None]
     logging.info(f"Loaded: {loaded}")
     yield
 
