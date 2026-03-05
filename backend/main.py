@@ -10,7 +10,7 @@ import os
 
 load_dotenv()
 
-MODELS_DIR = Path(__file__).parent / "models"
+MODELS_DIR = Path(__file__).parent
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 def load_pkl(filename):
