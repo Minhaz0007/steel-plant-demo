@@ -6,3 +6,8 @@ services:
     dockerContext: .
     region: oregon
     plan: free
+    envVars:
+      - key: FRONTEND_URL
+        value: https://your-app.vercel.app
+      - key: PORT
+        value: 8000

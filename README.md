@@ -1,6 +1,6 @@
 # 🏭 Steel Plant ML Optimization Dashboard
 
-A full-stack, ML-powered real-time dashboard for steel plant operations. Predicts **steel temperature**, **production output**, **energy consumption**, and **workforce requirements** from casting and process parameters.
+A full-stack, ML-powered real-time dashboard for steel plant operations. Predicts **steel temperature**, **production output**, **yield**, **energy consumption**, **workforce requirements**, and **crystallizer remaining useful life** from casting and process parameters.
 
 ---
 
@@ -13,10 +13,9 @@ steel-plant-demo/
 │   ├── requirements.txt
 │   ├── model_temperature.pkl   # XGBoost
 │   ├── model_production.pkl    # LightGBM
+│   ├── model_yield.pkl         # LightGBM
 │   ├── model_energy.pkl        # LightGBM
-│   ├── model_machines.pkl      # placeholder
-│   ├── energy_encoders.pkl     # LabelEncoders
-│   └── manpower_ratio.pkl      # dict
+│   └── model_rul.pkl           # LightGBM
 ├── frontend/              # React + Vite dashboard
 │   ├── src/
 │   │   ├── App.jsx        # Main UI
@@ -24,11 +23,10 @@ steel-plant-demo/
 │   │   └── index.css
 │   ├── index.html
 │   ├── package.json
-│   ├── vite.config.js
-│   ├── vercel.json
-│   └── .env.example
+│   └── vite.config.js
+├── Dockerfile             # Docker image for Render
 ├── render.yaml            # Render.com deployment config
-├── .gitignore
+├── vercel.json            # Vercel deployment config
 └── README.md
 ```
 
@@ -38,53 +36,32 @@ steel-plant-demo/
 
 | Model | Algorithm | Target | Typical Range |
 |-------|-----------|--------|---------------|
-| `model_temperature` | XGBoost | Molten steel temperature | ~1520–1565 °C |
-| `model_production` | LightGBM | Production output | ~100–180 tonnes |
-| `model_energy` | LightGBM | Energy consumption | ~2,000–12,000 kWh |
-| `model_machines` | LightGBM | (loaded, not used) | — |
-
-### Feature Engineering
-
-**Temperature model** inputs: `[workpiece_weight, workpiece_weight×0.98, alloy_speed, water_consumption, water_consumption×0.1, swing_frequency, num_crystallizer, num_stream, cast_in_row]`
-
-**Production model** inputs: `[workpiece_weight, cast_in_row, temperature_predicted, metal_residue_grab1, alloy_speed, water_consumption, swing_frequency, crystallizer_movement, num_crystallizer, num_stream, P_pct, Si_pct, C_pct, Mn_pct, Cu_pct]`
-
-**Energy model** inputs: `[lagging_reactive, leading_reactive, co2, lagging_pf, leading_pf, nsm, week_enc, day_enc, load_enc]`
-
-### Derived metrics
-
-| Metric | Formula |
-|--------|---------|
-| Manpower | `production_tonnes × workers_per_tonne × 1000` |
-| Energy cost | `energy_kwh × $0.12` |
-| Efficiency score | `min(100, production / 170 × 100)` |
+| `model_temperature` | XGBoost  | Molten steel temperature  | 1520–1620 °C |
+| `model_production`  | LightGBM | Production output         | 100–185 t    |
+| `model_yield`       | LightGBM | Yield percentage          | 69–100 %     |
+| `model_energy`      | LightGBM | Energy consumption        | 23–90 MWh    |
+| `model_rul`         | LightGBM | Crystallizer RUL          | 0–99000 heats|
 
 ---
 
 ## 🚀 Deployment
 
-### Backend → Render.com (Free Tier)
+### Backend (Render)
 
-1. Create a free account at [render.com](https://render.com)
-2. Connect your GitHub repository
-3. Choose **Web Service** and point it to this repo
-4. Render auto-detects `render.yaml` — no manual config needed
-5. Your API URL will be: `https://steel-plant-api.onrender.com`
+1. Connect this repo to [render.com](https://render.com)
+2. Render auto-detects `render.yaml` and the `Dockerfile` — no manual config needed
+3. After your first Vercel deploy, set the env var **`FRONTEND_URL`** to your Vercel URL (e.g. `https://your-app.vercel.app`) in the Render dashboard
+4. Your API will be available at: `https://steel-plant-api.onrender.com`
 
-> **Note:** Free tier instances spin down after inactivity. First request may take ~30s.
+> **Note:** Free tier instances spin down after inactivity. First request may take ~30s (the frontend shows "WARMING UP" during this time).
 
-### Frontend → Vercel
+### Frontend (Vercel)
 
-1. Install Vercel CLI: `npm i -g vercel`
-2. From the `frontend/` folder:
-   ```bash
-   cp .env.example .env
-   # Edit .env and set VITE_API_URL to your Render URL
-   vercel --prod
-   ```
-3. Or connect the repo in [vercel.com](https://vercel.com) dashboard
-   - Set **Root Directory** → `frontend`
-   - Add env var: `VITE_API_URL=https://your-render-url.onrender.com`
+1. Connect this repo to [vercel.com](https://vercel.com)
+2. Vercel will use `vercel.json` for build config automatically — no root directory override needed
+3. Set the env var **`VITE_API_URL`** to your Render backend URL (e.g. `https://steel-plant-api.onrender.com`)
+   - In the Vercel dashboard: Settings → Environment Variables → add `VITE_API_URL`
+   - Or create a Vercel secret `steel_plant_api_url` (referenced in `vercel.json`)
 
 ---
 
@@ -97,7 +74,7 @@ cd backend
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn main:app --reload
+uvicorn main:app --reload --port 8000
 # API docs: http://localhost:8000/docs
 ```
 
@@ -106,47 +83,42 @@ uvicorn main:app --reload
 ```bash
 cd frontend
 npm install
-cp .env.example .env            # set VITE_API_URL=http://localhost:8000
 npm run dev
 # Dashboard: http://localhost:5173
 ```
 
 ---
 
-## 🎨 UI Design
+## 🎨 UI Features
 
-- **Background:** Deep charcoal `#0a0a0f` with animated grid overlay
-- **Accents:** Electric blue `#00d4ff` · Amber `#ffaa00` · Green `#00ff88`
-- **Fonts:** Rajdhani (headers) · JetBrains Mono (numbers)
-- **Live predictions** with 300ms debounce on every slider change
-- **Temperature color coding:** Blue <1530°C · Green 1530–1560°C · Red >1560°C
-- **Skeleton loading** animation while fetching
+- **14 live input parameters** — sliders and number inputs with 400ms debounce
+- **5 ML model predictions** — temperature, production, yield, energy, RUL
+- **Warming-up indicator** — polls `/health` every 3s until all 5 models are loaded
+- **Dark/light theme** toggle (dark by default)
+- **Crystallizer Health card** with colour-coded wear status
+- **Production Yield Score** progress bar
 
 ---
 
 ## 📡 API Reference
 
-### `POST /predict`
+### `POST /api/predict`
 
-**Request body** (all fields have defaults):
+**Request body:**
 
 ```json
 {
-  "workpiece_weight": 163.0,
+  "production_target": 163.0,
+  "cast_in_row": 18,
   "num_crystallizer": 12,
   "num_stream": 3,
-  "cast_in_row": 5,
-  "alloy_speed": 1.2,
-  "water_consumption": 280.0,
-  "swing_frequency": 120.0,
-  "crystallizer_movement": 5.0,
-  "metal_residue_grab1": 2.0,
-  "P_pct": 0.02, "Si_pct": 0.25, "C_pct": 0.15, "Mn_pct": 1.0, "Cu_pct": 0.05,
-  "lagging_reactive": 50.0, "leading_reactive": 25.0, "co2": 2.5,
-  "lagging_pf": 0.85, "leading_pf": 0.90, "nsm": 50.0,
-  "week_status": "Weekday",
-  "day_of_week": "Monday",
-  "load_type": "Medium_Load"
+  "casting_speed": 2.0,
+  "water_flow": 2155.0,
+  "water_temp_delta": 9.0,
+  "swing_frequency": 200.0,
+  "crystallizer_movement": 7.0,
+  "C_pct": 0.19, "Si_pct": 0.19, "Mn_pct": 0.70, "P_pct": 0.01, "Cu_pct": 0.04,
+  "shift": "Day Shift"
 }
 ```
 
@@ -154,14 +126,20 @@ npm run dev
 
 ```json
 {
-  "temperature": 1541.23,
-  "production": 152.87,
-  "energy_kwh": 4823.50,
-  "manpower": 53504,
-  "energy_cost_usd": 578.82,
-  "efficiency_score": 89.92
+  "steel_temperature_celsius": 1553.2,
+  "production_tonnes": 161.45,
+  "yield_pct": 88.50,
+  "energy_mwh": 47.30,
+  "rul_heats": 24500.0,
+  "energy_cost_usd": 3311.0,
+  "workforce": 75,
+  "shift": "Day Shift"
 }
 ```
+
+### `GET /health`
+
+Returns `{ "status": "ok", "models_loaded": [...] }` — the frontend polls this until `models_loaded` has 5 items before showing "LIVE".
 
 ---
 
