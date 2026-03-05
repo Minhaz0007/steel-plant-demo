@@ -45,12 +45,12 @@ class PredictRequest(BaseModel):
     workpiece_weight: float = 163.0
     num_crystallizer: int = 12
     num_stream: int = 3
-    cast_in_row: int = 5
-    alloy_speed: float = 1.2
-    water_consumption: float = 280.0
-    swing_frequency: float = 120.0
-    crystallizer_movement: float = 5.0
-    resistance: float = 2.0
+    cast_in_row: int = 18
+    alloy_speed: float = 2.0
+    water_consumption: float = 2155.0
+    swing_frequency: float = 200.0
+    crystallizer_movement: float = 7.0
+    resistance: float = 5500.0
     metal_residue_grab1: float = 2.0
     P_pct: float = 0.015
     Si_pct: float = 0.25
@@ -128,11 +128,30 @@ def predict(req: PredictRequest):
         day_enc,                # Day_enc
         load_enc                # Load_enc
     ]])
-    energy_kwh = float(model_energy.predict(X_energy)[0])
+    raw_energy = float(model_energy.predict(X_energy)[0])
+
+    # Scale raw facility-interval output to realistic batch energy.
+    # The energy model was trained on 15-min interval data (max ~15000 kWh).
+    # Normalise to a 0-1 load factor, then multiply by industry benchmark:
+    # 400 kWh/tonne is a conservative mid-range for EAF/CCM operations.
+    ENERGY_PER_TONNE_KWH = 400
+    load_factor = min(1.0, max(0.0, (raw_energy - 500) / (15000 - 500)))
+    energy_kwh = production * ENERGY_PER_TONNE_KWH * (0.85 + 0.3 * load_factor)
 
     # --- Manpower ---
-    workers_per_tonne = manpower['workers_per_tonne']
-    manpower_count = round(production * float(workers_per_tonne) * 1000, 1)
+    # Industry-standard shift crew sizing for continuous casting operations.
+    # Source: CCM benchmark data (50-120 workers depending on shift/automation).
+    BASE_WORKERS = {'Day Shift': 75, 'Night Shift': 65, 'Weekend': 50}
+    if req.week_status == 'Weekend':
+        shift_key = 'Weekend'
+    elif req.load_type == 'Maximum_Load':
+        shift_key = 'Night Shift'
+    else:
+        shift_key = 'Day Shift'
+    base = BASE_WORKERS[shift_key]
+    equipment_factor = 1.0 + (req.num_stream - 3) * 0.04 + (req.num_crystallizer - 12) * 0.008
+    wf_load_factor = 1.0 + (production - 163) / 163 * 0.15
+    manpower_count = round(base * equipment_factor * wf_load_factor)
 
     return {
         "temperature": round(temperature, 1),
@@ -141,6 +160,6 @@ def predict(req: PredictRequest):
         "manpower": manpower_count,
         "num_crystallizer": req.num_crystallizer,
         "num_stream": req.num_stream,
-        "energy_cost_usd": round(energy_kwh * 0.12, 2),
+        "energy_cost_usd": round(energy_kwh * 0.07, 2),
         "efficiency_score": round(min(100.0, (production / 170.0) * 100), 1)
     }

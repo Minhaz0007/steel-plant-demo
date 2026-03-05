@@ -13,11 +13,11 @@ const DEFAULT_PARAMS = {
   workpiece_weight:      163,
   num_stream:            3,
   num_crystallizer:      12,
-  cast_in_row:           5,
-  alloy_speed:           1.2,
-  water_consumption:     280,
-  swing_frequency:       120,
-  crystallizer_movement: 5,
+  cast_in_row:           18,
+  alloy_speed:           2.0,
+  water_consumption:     2155,
+  swing_frequency:       200,
+  crystallizer_movement: 7,
   metal_residue_grab1:   2,
   P_pct:  0.02,
   Si_pct: 0.25,
@@ -385,7 +385,7 @@ export default function App() {
           <Slider
             label="Water Flow"
             value={params.water_consumption}
-            min={100} max={500} step={5}
+            min={1000} max={3500} step={50}
             unit="L/min"
             onChange={setParam('water_consumption')}
             accent={COLORS.blue}
