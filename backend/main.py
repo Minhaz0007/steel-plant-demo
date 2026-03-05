@@ -56,6 +56,10 @@ app.add_middleware(
 from routers.predict import router
 app.include_router(router, prefix="/api")
 
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "Steel Plant ML API"}
+
 @app.get("/health")
 def health():
     loaded = [k for k in ["model_temperature","model_production","model_yield",
