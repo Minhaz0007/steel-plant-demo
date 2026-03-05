@@ -2,11 +2,18 @@
 Script to create demo ML model pkl files for the Steel Plant Optimization Dashboard.
 Run once to generate the pkl files needed by main.py.
 """
+import os
 import numpy as np
 import joblib
 from sklearn.preprocessing import LabelEncoder
 
 np.random.seed(42)
+
+# Always save pkl files next to this script, regardless of cwd
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def _out(name):
+    return os.path.join(SCRIPT_DIR, name)
 
 # ── 1. Temperature model (XGBoost) ──────────────────────────────────────────
 try:
@@ -44,7 +51,7 @@ try:
 
     model_temp = XGBRegressor(n_estimators=100, max_depth=4, random_state=42)
     model_temp.fit(X_temp, y_temp)
-    joblib.dump(model_temp, "model_temperature.pkl")
+    joblib.dump(model_temp, _out("model_temperature.pkl"))
     print("✓ model_temperature.pkl (XGBoost)")
 except Exception as e:
     print(f"✗ model_temperature.pkl failed: {e}")
@@ -91,7 +98,7 @@ try:
 
     model_prod = LGBMRegressor(n_estimators=100, max_depth=4, random_state=42, verbose=-1)
     model_prod.fit(X_prod, y_prod)
-    joblib.dump(model_prod, "model_production.pkl")
+    joblib.dump(model_prod, _out("model_production.pkl"))
     print("✓ model_production.pkl (LightGBM)")
 except Exception as e:
     print(f"✗ model_production.pkl failed: {e}")
@@ -127,7 +134,7 @@ try:
 
     model_en = LGBMRegressor(n_estimators=100, max_depth=4, random_state=42, verbose=-1)
     model_en.fit(X_en, y_en)
-    joblib.dump(model_en, "model_energy.pkl")
+    joblib.dump(model_en, _out("model_energy.pkl"))
     print("✓ model_energy.pkl (LightGBM)")
 except Exception as e:
     print(f"✗ model_energy.pkl failed: {e}")
@@ -139,7 +146,7 @@ try:
     X_dummy = np.random.rand(50, 5)
     y_dummy = np.random.rand(50)
     model_mach.fit(X_dummy, y_dummy)
-    joblib.dump(model_mach, "model_machines.pkl")
+    joblib.dump(model_mach, _out("model_machines.pkl"))
     print("✓ model_machines.pkl (placeholder LightGBM)")
 except Exception as e:
     print(f"✗ model_machines.pkl failed: {e}")
@@ -156,11 +163,11 @@ try:
     le_load.fit(["Light_Load", "Maximum_Load", "Medium_Load"])
 
     encoders = {
-        "WeekStatus":   le_week,
-        "Day_of_week":  le_day,
-        "Load_Type":    le_load,
+        "week": le_week,   # matches encoders['week'] in main.py
+        "day":  le_day,    # matches encoders['day']  in main.py
+        "load": le_load,   # matches encoders['load'] in main.py
     }
-    joblib.dump(encoders, "energy_encoders.pkl")
+    joblib.dump(encoders, _out("energy_encoders.pkl"))
     print("✓ energy_encoders.pkl")
 except Exception as e:
     print(f"✗ energy_encoders.pkl failed: {e}")
@@ -168,7 +175,7 @@ except Exception as e:
 # ── 6. Manpower ratio ────────────────────────────────────────────────────────
 try:
     manpower = {"workers_per_tonne": 0.35}
-    joblib.dump(manpower, "manpower_ratio.pkl")
+    joblib.dump(manpower, _out("manpower_ratio.pkl"))
     print("✓ manpower_ratio.pkl")
 except Exception as e:
     print(f"✗ manpower_ratio.pkl failed: {e}")
