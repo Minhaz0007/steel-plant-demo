@@ -12,30 +12,35 @@ np.random.seed(42)
 try:
     from xgboost import XGBRegressor
 
-    # Feature order: [workpiece_weight, workpiece_weight*0.98, alloy_speed,
-    #                 water_consumption, water_consumption*0.1, swing_frequency,
-    #                 num_crystallizer, num_stream, cast_in_row]
+    # Feature order matches main.py X_temp exactly (10 features):
+    # [workpiece_weight, workpiece_weight, num_crystallizer, num_stream,
+    #  cast_in_row, alloy_speed, water_consumption, swing_frequency,
+    #  crystallizer_movement, resistance]
     n = 500
     ww   = np.random.uniform(150, 185, n)
-    asp  = np.random.uniform(0.5, 2.0, n)
-    wc   = np.random.uniform(100, 500, n)
-    sf   = np.random.uniform(50, 200, n)
     nc   = np.random.randint(1, 25, n).astype(float)
     ns   = np.random.randint(1, 7,  n).astype(float)
     cir  = np.random.randint(1, 21, n).astype(float)
+    asp  = np.random.uniform(0.5, 2.0, n)
+    wc   = np.random.uniform(1000, 3500, n)   # realistic CCM water flow L/min
+    sf   = np.random.uniform(50, 300, n)
+    cm   = np.random.uniform(1, 15, n)
+    res  = np.random.uniform(1000, 10000, n)
 
-    X_temp = np.column_stack([ww, ww * 0.98, asp, wc, wc * 0.1, sf, nc, ns, cir])
+    X_temp = np.column_stack([ww, ww, nc, ns, cir, asp, wc, sf, cm, res])
     y_temp = (
         1520
-        + ww * 0.05
-        + asp * 8
-        - wc * 0.01
-        + sf * 0.05
-        + nc * 0.3
-        + ns * 0.5
-        + cir * 0.2
+        + ww * 0.05      # heavier steel → higher temp
+        + asp * 8        # faster casting speed → higher temp
+        - wc * 0.003     # more cooling water → lower temp
+        + sf * 0.05      # swing frequency effect
+        + nc * 0.3       # more crystallizers
+        + ns * 0.5       # more streams
+        + cir * 0.2      # longer cast sequence
         + np.random.normal(0, 2, n)
     )
+    # Expected output for defaults (ww=163,asp=2.0,wc=2155,sf=200,nc=12,ns=3,cir=18):
+    # 1520 + 8.15 + 16 - 6.47 + 10 + 3.6 + 1.5 + 3.6 ≈ 1556 °C
 
     model_temp = XGBRegressor(n_estimators=100, max_depth=4, random_state=42)
     model_temp.fit(X_temp, y_temp)
