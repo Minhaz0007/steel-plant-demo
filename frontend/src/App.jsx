@@ -430,7 +430,7 @@ export default function App() {
             <MetricCard
               title="Steel Temperature" icon="🌡" color={tempColor}
               badge="XGBoost" isLoading={isLoading} error={error}
-              value={temp?.toFixed(1)} unit="°C"
+              value={prediction?.steel_temperature_celsius?.toFixed(1)} unit="°C"
               subtitle={
                 !temp ? null
                   : temp > 1570  ? 'Above optimal range'
