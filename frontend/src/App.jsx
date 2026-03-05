@@ -18,7 +18,7 @@ function Slider({ label, value, min, max, step = 1, unit = '', onChange, accent 
         </span>
       </div>
       <div style={{ position: 'relative', height: '6px' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-input)', borderRadius: '3px' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'var(--bg-inset)', borderRadius: '3px', boxShadow: 'var(--shadow-inset)' }} />
         <div style={{
           position: 'absolute', left: 0, top: 0, bottom: 0,
           width: `${pct}%`, background: accent,
@@ -72,7 +72,7 @@ function MetricCard({ title, value, unit, subtitle, icon, color, isLoading, erro
       padding: '24px',
       position: 'relative',
       overflow: 'hidden',
-      boxShadow: `0 4px 24px ${color}11, inset 0 1px 0 ${color}22`,
+      boxShadow: `var(--shadow-card), 0 4px 24px ${color}18, inset 0 1px 0 ${color}30`,
       flex: 1,
       minWidth: 0,
     }}>
@@ -149,7 +149,7 @@ export default function App() {
   const [isLoading,    setIsLoading]    = useState(false)
   const [isWarmingUp,  setIsWarmingUp]  = useState(true)
   const [error,        setError]        = useState(null)
-  const [isDark,       setIsDark]       = useState(true)
+  const [isDark,       setIsDark]       = useState(false)
 
   // Theme
   useEffect(() => {
@@ -282,7 +282,7 @@ export default function App() {
         background: 'var(--gradient-header)',
         border: '1px solid var(--bg-border)',
         borderRadius: '14px',
-        boxShadow: 'var(--shadow-card)',
+        boxShadow: 'var(--shadow-header)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{
@@ -345,6 +345,7 @@ export default function App() {
           padding: '24px',
           overflowY: 'auto',
           maxHeight: 'calc(100vh - 180px)',
+          boxShadow: 'var(--shadow-panel)',
         }}>
           <div style={{
             fontSize: '11px', fontWeight: 700, letterSpacing: '2px',
@@ -467,6 +468,7 @@ export default function App() {
             border: '1px solid var(--bg-border)',
             borderRadius: '16px',
             padding: '24px',
+            boxShadow: 'var(--shadow-card)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
@@ -486,7 +488,7 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{ height: '12px', background: 'var(--bg-input)', borderRadius: '6px', overflow: 'hidden', position: 'relative' }}>
+            <div style={{ height: '12px', background: 'var(--bg-inset)', borderRadius: '6px', overflow: 'hidden', position: 'relative', boxShadow: 'var(--shadow-inset)' }}>
               {isLoading ? (
                 <div className="skeleton" style={{ height: '100%', borderRadius: '6px' }} />
               ) : (
@@ -519,8 +521,9 @@ export default function App() {
               { label: 'Shift',          value: shift,                     unit: ''       },
             ].map(stat => (
               <div key={stat.label} style={{
-                background: 'var(--bg-card)', border: '1px solid var(--bg-border)',
+                background: 'var(--gradient-card)', border: '1px solid var(--bg-border)',
                 borderRadius: '10px', padding: '14px 16px',
+                boxShadow: 'var(--shadow-card)',
               }}>
                 <div style={{ fontSize: '11px', color: 'var(--text-dim)', letterSpacing: '0.5px', marginBottom: '6px' }}>
                   {stat.label}
@@ -541,7 +544,7 @@ export default function App() {
             padding: '24px',
             position: 'relative',
             overflow: 'hidden',
-            boxShadow: `0 4px 24px ${rulColor}11`,
+            boxShadow: `var(--shadow-card), 0 4px 24px ${rulColor}18, inset 0 1px 0 ${rulColor}25`,
           }}>
             <div style={{
               position: 'absolute', top: -40, right: -40,
@@ -597,10 +600,11 @@ export default function App() {
               { label: 'RUL Model',         badge: 'LightGBM', color: COLORS.purple },
             ].map(m => (
               <div key={m.label} style={{
-                background: 'var(--bg-card)', border: '1px solid var(--bg-border)',
+                background: 'var(--gradient-card)', border: '1px solid var(--bg-border)',
                 borderRadius: '8px', padding: '10px 16px',
                 display: 'flex', alignItems: 'center', gap: '10px',
                 flex: 1,
+                boxShadow: 'var(--shadow-card)',
               }}>
                 <div style={{
                   padding: '2px 8px',
