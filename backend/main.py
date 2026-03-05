@@ -19,45 +19,7 @@ BASE = os.path.dirname(__file__)
 def _load(name):
     return joblib.load(os.path.join(BASE, name))
 
-def _build_temperature_model():
-    """Train a fresh temperature model with the correct 10-feature schema."""
-    from xgboost import XGBRegressor
-    rng = np.random.default_rng(42)
-    n   = 500
-    ww  = rng.uniform(150, 185, n)
-    nc  = rng.integers(1, 25, n).astype(float)
-    ns  = rng.integers(1, 7,  n).astype(float)
-    cir = rng.integers(1, 21, n).astype(float)
-    asp = rng.uniform(0.5, 2.0, n)
-    wc  = rng.uniform(1000, 3500, n)
-    sf  = rng.uniform(50, 300, n)
-    cm  = rng.uniform(1, 15, n)
-    res = rng.uniform(1000, 10000, n)
-    # Feature order matches X_temp in /predict exactly
-    X = np.column_stack([ww, ww, nc, ns, cir, asp, wc, sf, cm, res])
-    y = (1520 + ww*0.05 + asp*8 - wc*0.003 + sf*0.05
-         + nc*0.3 + ns*0.5 + cir*0.2 + rng.normal(0, 2, n))
-    m = XGBRegressor(n_estimators=100, max_depth=4, random_state=42)
-    m.fit(X, y)
-    return m
-
-def _load_temperature_model():
-    """Load temperature model, rebuilding it if the pkl is stale/corrupt."""
-    _SANITY = np.array([[163.0, 163.0, 12, 3, 18, 2.0, 2155.0, 200.0, 7.0, 5500.0]])
-    try:
-        m = _load("model_temperature.pkl")
-        val = float(m.predict(_SANITY)[0])
-        if 1400 < val < 1700:
-            return m
-        print(f"[startup] Temperature model sanity check failed (got {val:.1f}°C) – rebuilding")
-    except Exception as e:
-        print(f"[startup] Temperature model load error: {e} – rebuilding")
-    m = _build_temperature_model()
-    joblib.dump(m, os.path.join(BASE, "model_temperature.pkl"))
-    print(f"[startup] Temperature model rebuilt → {float(m.predict(_SANITY)[0]):.1f}°C")
-    return m
-
-model_temperature = _load_temperature_model()
+model_temperature = _load("model_temperature.pkl")
 model_production  = _load("model_production.pkl")
 model_energy      = _load("model_energy.pkl")
 encoders          = _load("energy_encoders.pkl")
