@@ -191,8 +191,8 @@ export default function App() {
         throw new Error(errData.detail || `HTTP ${res.status}`)
       }
       setPrediction(await res.json())
-    } catch {
-      setError('Connection error — is the backend running?')
+    } catch (e) {
+      setError(e.message || 'Connection error — is the backend running?')
     } finally {
       setIsLoading(false)
     }
@@ -328,7 +328,7 @@ export default function App() {
               animation: 'pulse 2s ease-in-out infinite',
             }} />
             <span className="mono" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              {isWarmingUp ? 'WARMING UP' : error ? 'DISCONNECTED' : 'LIVE'}
+              {isWarmingUp ? 'WARMING UP' : error ? (error.startsWith('HTTP') ? 'SERVER ERROR' : 'DISCONNECTED') : 'LIVE'}
             </span>
           </div>
         </div>
