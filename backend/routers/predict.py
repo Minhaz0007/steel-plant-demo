@@ -78,10 +78,10 @@ def predict(req: PredictRequest, request: Request):
         }])[state.feature_names]
 
         steel_temp_c      = float(state.model_temperature.predict(input_df)[0])
-        production_tonnes = float(state.model_production.predict(input_df)[0])
-        # Yield is derived from actual vs target weight — the independent yield
-        # model predicted without knowing the production model's output, causing
-        # mathematically inconsistent numbers (e.g. output > target yet yield < 100%).
+        # Cap at production_target: conservation of mass — you cannot cast more
+        # steel than was in the ladle (real CCM yield is always < 100%).
+        production_tonnes = min(float(state.model_production.predict(input_df)[0]),
+                                req.production_target)
         yield_pct         = (production_tonnes / req.production_target) * 100
         energy_mwh        = float(state.model_energy.predict(input_df)[0])
         rul_heats         = float(state.model_rul.predict(input_df)[0])
