@@ -476,7 +476,7 @@ export default function App() {
                   ▲ Production Yield Score
                 </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '4px' }}>
-                  Based on actual vs theoretical steel weight — LightGBM model
+                  Actual cast weight ÷ target ladle weight × 100
                 </div>
               </div>
               <div className="mono" style={{
@@ -595,7 +595,7 @@ export default function App() {
             {[
               { label: 'Temperature Model', badge: 'XGBoost',  color: COLORS.orange },
               { label: 'Production Model',  badge: 'LightGBM', color: COLORS.green  },
-              { label: 'Yield Model',       badge: 'LightGBM', color: COLORS.blue   },
+              { label: 'Yield',             badge: 'output ÷ target', color: COLORS.blue   },
               { label: 'Energy Model',      badge: 'LightGBM', color: COLORS.amber  },
               { label: 'RUL Model',         badge: 'LightGBM', color: COLORS.purple },
             ].map(m => (
